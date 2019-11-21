@@ -1,6 +1,6 @@
 const ArgumentParser = require("argparse").ArgumentParser;
-const getPeersList = require("./api");
-var magnet = require("magnet-uri");
+const getPeersFromHash = require("./api").getPeersFromHash;
+const getPeersFromMagnetURI = require("./api").getPeersFromMagnetURI;
 
 const parser = new ArgumentParser({
     version: `1.0.0`,
@@ -26,24 +26,20 @@ try {
     process.exit(1);
 }
 
-let torrentHash = "";
-let additionalTrackers = [];
+let peerListPromise = null;
 
 if (args.uri) {
-    const parsedTorrent = magnet(args.uri);
-    if (!parsedTorrent.infoHash) {
-        console.error(
-            `Invalid Magnet URI. Can't extract torrent hash from URI`
-        );
-        process.exit(1);
-    }
-    torrentHash = parsedTorrent.infoHash;
-    additionalTrackers = parsedTorrent.announce;
+    peerListPromise = getPeersFromMagnetURI(args.uri);
 } else if (args.hash) {
-    torrentHash = args.hash;
+    peerListPromise = getPeersFromHash(args.hash);
 }
 
-getPeersList(torrentHash, additionalTrackers)
+if (peerListPromise === null) {
+    console.error("Invalid hash or magnet URL provided!");
+    process.exit(1);
+}
+
+peerListPromise
     .then(peerList => {
         console.log(`Count of peers found: ${peerList.length}`);
         for (let i = 0; i < peerList.length; i++) {
