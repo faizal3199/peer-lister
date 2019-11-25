@@ -8,7 +8,7 @@ node index.js --hash "xyz-hash-here"
 ```
 
 ### Fetch peers using Magnet URI
-In case Magnet URI has trackers mentioned it also uses them along with pre-defined trackers.
+If Magnet URI has trackers mentioned those trackers will also be used alongside with pre-defined trackers.
 ```bash
 node index.js --uri "magnet:?xt=urn:btih:...."
 ```
